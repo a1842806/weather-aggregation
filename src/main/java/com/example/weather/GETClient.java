@@ -115,6 +115,11 @@ public class GETClient {
     private static void parseAndDisplayWeatherData(String jsonResponse) {
         List<Map<String, String>> dataList = JSONParser.convertToMapList(jsonResponse);
         
+        if (dataList.isEmpty()) {
+            System.out.println("No weather data available for the specified station.");
+            return;
+        }
+
         System.out.println("Weather Data:");
         for (Map<String, String> data : dataList) {
             for (Map.Entry<String, String> entry : data.entrySet()) {

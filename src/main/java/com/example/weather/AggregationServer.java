@@ -71,9 +71,36 @@ public class AggregationServer {
     }
 
     private void handleGetRequest(HttpExchange exchange) throws IOException {
-        List<Map<String, String>> allData = new ArrayList<>(weatherDataMap.values());
-        String response = JSONParser.convertToJson(allData);
+        String query = exchange.getRequestURI().getQuery();
+        String stationId = null;
+        if (query != null) {
+            Map<String, String> queryParams = parseQueryString(query);
+            stationId = queryParams.get("station");
+        }
+
+        List<Map<String, String>> responseData;
+        if (stationId != null) {
+            Map<String, String> stationData = weatherDataMap.get(stationId);
+            responseData = stationData != null ? Collections.singletonList(stationData) : Collections.emptyList();
+        } else {
+            responseData = new ArrayList<>(weatherDataMap.values());
+        }
+
+        String response = JSONParser.convertToJson(responseData);
         sendResponse(exchange, 200, response);
+    }
+
+    private Map<String, String> parseQueryString(String query) {
+        Map<String, String> result = new HashMap<>();
+        for (String param : query.split("&")) {
+            String[] pair = param.split("=");
+            if (pair.length > 1) {
+                result.put(pair[0], pair[1]);
+            } else {
+                result.put(pair[0], "");
+            }
+        }
+        return result;
     }
 
     private void handlePutRequest(HttpExchange exchange) throws IOException {
