@@ -1,99 +1,220 @@
 package com.example.weather;
 
-// import static org.junit.jupiter.api.Assertions.*;
-// import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.*;
 
-// import java.io.BufferedReader;
-// import java.io.InputStreamReader;
-// import java.io.StringReader;
-// import java.net.HttpURLConnection;
-// import java.net.URL;
-// import java.net.URI;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.logging.*;
 
-// import org.junit.jupiter.api.BeforeEach;
-// import org.junit.jupiter.api.Test;
-// import org.mockito.InjectMocks;
-// import org.mockito.Mock;
-// import org.mockito.MockitoAnnotations;
-
+/**
+ * Test class for testing the GETClient functionality.
+ * This test class verifies that GETClient retrieves and displays data correctly,
+ * handles missing data scenarios, and captures logger outputs for various cases.
+ */
 public class GETClientTest {
 
-    // @Mock
-    // private HttpURLConnection mockConnection;
+    // Configuration variables
+    private static final int TEST_PORT = 4567;  // Port on which the test server will run
+    private static Thread serverThread;  // Thread to run the AggregationServer
+    private static final String SERVER_URL = "http://localhost:" + TEST_PORT;  // URL to access the server
+    private static final Logger LOGGER = Logger.getLogger(GETClient.class.getName());  // Logger for capturing outputs
 
-    // @InjectMocks
-    // private GETClient getClient;
+    /**
+     * Starts the AggregationServer before all test methods.
+     */
+    @BeforeAll
+    public static void startServer() {
+        // Start the AggregationServer in a separate thread
+        serverThread = new Thread(() -> AggregationServer.main(new String[]{String.valueOf(TEST_PORT)}));
+        serverThread.start();
 
-    // @BeforeEach
-    // public void setUp() throws Exception {
-    //     // Initialize Mockito annotations
-    //     MockitoAnnotations.openMocks(this);
-    // }
+        // Wait for the server to initialize
+        try {
+            Thread.sleep(2000); // Wait for 2 seconds to ensure the server is ready
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
 
-    // // Test the Lamport clock increments when sending a request
-    // @Test
-    // public void testLamportClockIncrement() throws Exception {
-    //     // Mock the URL and HttpURLConnection behavior
-    //     URI uri = new URI("http", null, "example.com", -1, "/weather", null, null);
-    //     URL url = uri.toURL();
-    //     when(mockConnection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
-    //     when(mockConnection.getInputStream()).thenReturn(new BufferedReader(new StringReader("{}")).getInputStream());
+    /**
+     * Stops the AggregationServer and cleans up resources after all test methods.
+     */
+    @AfterAll
+    public static void stopServer() {
+        // Delete the weather data file to clean up after tests
+        try {
+            Files.deleteIfExists(Paths.get("weather_data.json"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-    //     // Spy on the class to intercept method calls
-    //     GETClient spyClient = spy(GETClient.class);
-    //     doNothing().when(spyClient).parseAndDisplayWeatherData(anyString());
+        // Interrupt the server thread to stop the AggregationServer
+        serverThread.interrupt();
+    }
 
-    //     // Send the request and validate Lamport clock increment
-    //     spyClient.sendGETRequest(url.toString());
+    /**
+     * Tests if GETClient can successfully retrieve data that was previously sent via a PUT request.
+     * Sends a PUT request to store weather data, then runs GETClient to retrieve and verify the data.
+     *
+     * @throws IOException If there is an error in sending the PUT request.
+     */
+    @Test
+    @Order(1)
+    public void testGETClientRetrievesData() throws IOException {
+        // Create sample weather data to be sent to the server
+        String stationId = "stationTestGET";
+        Map<String, String> weatherData = new HashMap<>();
+        weatherData.put("id", stationId);
+        weatherData.put("temperature", "22");
 
-    //     // Verify that the Lamport clock has been incremented (it starts at 0)
-    //     verify(spyClient, times(1)).incrementLamportClock();
-    // }
+        // Send PUT request to AggregationServer with the sample weather data
+        HttpURLConnection connection = sendPutRequest(weatherData);
+        int responseCode = connection.getResponseCode();
+        assertEquals(201 | 200, responseCode, "PUT request should return successful response code");
+        connection.disconnect();
 
-    // // Test handling of a valid HTTP response with weather data
-    // @Test
-    // public void testParseAndDisplayWeatherData() throws Exception {
-    //     // Mock the input response stream (simulating JSON response)
-    //     String jsonResponse = "{\"temperature\":\"25.4\",\"humidity\":\"80\"}";
-    //     BufferedReader mockReader = new BufferedReader(new StringReader(jsonResponse));
+        // Wait for the server to process the PUT request
+        try {
+            Thread.sleep(2000); // Wait 2 seconds for the data to be processed by the server
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
 
-    //     when(mockConnection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
-    //     when(mockConnection.getInputStream()).thenReturn(mockReader);
+        // Capture System.out output to verify GETClient's console output
+        ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+        PrintStream originalOut = System.out;
+        System.setOut(new PrintStream(outContent));
 
-    //     // Spy on the GETClient class to verify behavior
-    //     GETClient spyClient = spy(GETClient.class);
-    //     doNothing().when(spyClient).parseAndDisplayWeatherData(anyString());
+        // Run GETClient to retrieve the weather data for the specified station ID
+        GETClient.main(new String[]{SERVER_URL, stationId});
 
-    //     // Send the GET request and verify response parsing
-    //     spyClient.sendGETRequest("http://example.com/weather");
+        // Restore the original System.out to prevent interference with other tests
+        System.setOut(originalOut);
 
-    //     // Verify that the parsing method is called with the correct JSON response
-    //     verify(spyClient, times(1)).parseAndDisplayWeatherData(jsonResponse);
-    // }
+        // Check the captured output from GETClient for the expected data
+        String output = outContent.toString(StandardCharsets.UTF_8.name());
+        assertTrue(output.contains("Weather Data:"), "Output should contain 'Weather Data:'");
+        assertTrue(output.contains("temperature: 22"), "Output should contain 'temperature: 22'");
+    }
 
-    // // Test handling of a failed HTTP GET request (e.g., 404 Not Found)
-    // @Test
-    // public void testFailedGETRequest() throws Exception {
-    //     when(mockConnection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_NOT_FOUND);
+    /**
+     * Tests if GETClient correctly handles a "No Content" scenario.
+     * Runs GETClient for a non-existent station and verifies that the logger captures the appropriate message.
+     *
+     * @throws IOException If an error occurs during file operations.
+     */
+    @Test
+    @Order(2)
+    public void testGETClientHandlesNoContentWithLogger() throws IOException {
+        String stationId = "nonExistentStation";
 
-    //     GETClient spyClient = spy(GETClient.class);
+        // Ensure no data exists for the station by deleting any existing weather data file
+        deleteDataFile();
 
-    //     // Attempt to send the request and check that the error message is logged
-    //     spyClient.sendGETRequest("http://example.com/weather");
+        // Set up a ByteArrayOutputStream to capture logger output
+        ByteArrayOutputStream logStream = new ByteArrayOutputStream();
+        Handler logHandler = new StreamHandler(logStream, new SimpleFormatter());
 
-    //     // Verify that no response parsing occurs since the request failed
-    //     verify(spyClient, never()).parseAndDisplayWeatherData(anyString());
-    // }
+        // Add the custom handler to capture logger output for GETClient
+        Logger logger = Logger.getLogger(GETClient.class.getName());
+        logger.addHandler(logHandler);
+        logger.setUseParentHandlers(false);  // Disable parent handlers to avoid duplication
 
-    // // Test that the request URL is correctly built
-    // @Test
-    // public void testRequestUrlFormatting() {
-    //     String serverUrl = "example.com";
-    //     String stationId = "123";
+        // Run GETClient with the server URL and non-existent station ID
+        GETClient.main(new String[]{SERVER_URL, stationId});
 
-    //     // Check that the URL is correctly formatted with stationId
-    //     String expectedUrl = "http://example.com/weather?station=123";
-    //     String result = GETClient.buildRequestUrl(serverUrl, stationId);
-    //     assertEquals(expectedUrl, result);
-    // }
+        // Flush and remove the custom handler after running the main method
+        logHandler.flush();
+        logger.removeHandler(logHandler);
+
+        // Convert the captured log output to a string
+        String logOutput;
+        try {
+            logOutput = logStream.toString(StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException("UTF-8 encoding is not supported", e);
+        }
+
+        // Verify that the log output indicates no content is available
+        assertTrue(logOutput.contains("No content available from the server.") || logOutput.contains("No weather data available"),
+                "Log output should indicate no content available");
+    }
+
+    /**
+     * Tests if GETClient correctly handles an invalid URL (bad request scenario).
+     * Runs GETClient with an invalid URL and verifies that the logger captures the appropriate error message.
+     */
+    @Test
+    @Order(3)
+    public void testGETClientHandlesBadRequestWithLogger() {
+        // Simulate a bad request by using an invalid URL
+        String invalidServerUrl = "http://localhost:4567/invalidEndpoint";
+
+        // Create a custom log handler to capture log messages
+        ByteArrayOutputStream logStream = new ByteArrayOutputStream();
+        Handler logHandler = new StreamHandler(logStream, new SimpleFormatter());
+
+        // Add the custom handler to capture logger output for GETClient
+        LOGGER.addHandler(logHandler);
+        LOGGER.setUseParentHandlers(false);  // Disable parent handlers to avoid duplication
+
+        // Run GETClient with the invalid URL
+        GETClient.main(new String[]{invalidServerUrl});
+
+        // Flush and remove the custom handler after running the main method
+        logHandler.flush();
+        LOGGER.removeHandler(logHandler);
+
+        // Verify that the log output contains the expected error message
+        String logOutput;
+        try {
+            logOutput = logStream.toString(StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException("UTF-8 encoding is not supported", e);
+        }
+        assertTrue(logOutput.contains("Failed to send GET request") || logOutput.contains("Bad request"),
+                "Log output should indicate a bad request or a failure to send GET request");
+    }
+
+    /**
+     * Helper method to send a PUT request to the AggregationServer with the provided data.
+     *
+     * @param data A map containing the weather data to be sent.
+     * @return HttpURLConnection object for further assertions.
+     * @throws IOException If an I/O error occurs during the PUT request.
+     */
+    private HttpURLConnection sendPutRequest(Map<String, String> data) throws IOException {
+        HttpURLConnection connection = (HttpURLConnection) URI.create(SERVER_URL + "/weather.json").toURL().openConnection();
+        connection.setRequestMethod("PUT");
+        connection.setDoOutput(true);
+        connection.setRequestProperty("Content-Type", "application/json");
+
+        String jsonData = JSONParser.convertToJson(data);
+        byte[] jsonBytes = jsonData.getBytes(StandardCharsets.UTF_8);
+        connection.setRequestProperty("Content-Length", String.valueOf(jsonBytes.length));
+
+        try (OutputStream os = connection.getOutputStream()) {
+            os.write(jsonBytes);
+        }
+
+        return connection;
+    }
+
+    /**
+     * Helper method to delete the data file ("weather_data.json") to simulate a "No Content" scenario.
+     *
+     * @throws IOException If an I/O error occurs during file operations.
+     */
+    private void deleteDataFile() throws IOException {
+        File dataFile = new File("weather_data.json");
+        if (dataFile.exists()) {
+            dataFile.delete();
+        }
+    }
 }
