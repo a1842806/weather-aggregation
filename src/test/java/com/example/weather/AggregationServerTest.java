@@ -58,7 +58,6 @@ public class AggregationServerTest {
 
     /**
      * Test to ensure that the first PUT request to the server returns a 201 Created response.
-     * @throws IOException if the HTTP request fails.
      */
     @Test
     @Order(1)
@@ -76,7 +75,6 @@ public class AggregationServerTest {
 
     /**
      * Test to ensure that subsequent PUT requests return a 200 OK response.
-     * @throws IOException if the HTTP request fails.
      */
     @Test
     @Order(2)
@@ -99,7 +97,6 @@ public class AggregationServerTest {
 
     /**
      * Test to ensure that a GET request returns the correct weather data.
-     * @throws IOException if the HTTP request fails.
      */
     @Test
     @Order(3)
@@ -141,7 +138,6 @@ public class AggregationServerTest {
 
     /**
      * Test to ensure that invalid JSON in a PUT request returns a 500 Internal Server Error.
-     * @throws IOException if the HTTP request fails.
      */
     @Test
     @Order(5)
@@ -166,7 +162,6 @@ public class AggregationServerTest {
 
     /**
      * Test to ensure that invalid JSON in a PUT request returns a 500 Internal Server Error.
-     * @throws IOException if the HTTP request fails.
      */
     @Test
     @Order(6)
@@ -193,7 +188,6 @@ public class AggregationServerTest {
     
     /**
      * Test to ensure that an unsupported method returns a 400 Bad Request response.
-     * @throws IOException if the HTTP request fails.
      */
     @Test
     @Order(7)
@@ -209,7 +203,6 @@ public class AggregationServerTest {
     
     /**
      * Test to ensure that a PUT request with no content returns a 204 No Content response.
-     * @throws IOException if the HTTP request fails.
      */
     @Test
     @Order(8)
@@ -228,7 +221,6 @@ public class AggregationServerTest {
      * Sends a PUT request to the server with the specified weather data.
      * @param data The weather data to send in the PUT request.
      * @return The HttpURLConnection object representing the PUT request.
-     * @throws IOException if the HTTP request fails.
      */
     private HttpURLConnection sendPutRequest(Map<String, String> data) throws IOException {
         HttpURLConnection connection = (HttpURLConnection) URI.create(SERVER_URL + "/weather.json").toURL().openConnection();
@@ -251,7 +243,6 @@ public class AggregationServerTest {
      * Sends a GET request to the server for the specified station ID.
      * @param stationId The station ID for which to retrieve weather data.
      * @return The HttpURLConnection object representing the GET request.
-     * @throws IOException if the HTTP request fails.
      */
     private HttpURLConnection sendGetRequest(String stationId) throws IOException {
         String urlStr = SERVER_URL + "/weather.json";
@@ -268,7 +259,6 @@ public class AggregationServerTest {
      * Reads the response body from the provided HTTP connection.
      * @param connection The HttpURLConnection object representing the connection.
      * @return A string containing the response body.
-     * @throws IOException if the HTTP request fails.
      */
     private String readResponseBody(HttpURLConnection connection) throws IOException {
         StringBuilder responseBody = new StringBuilder();

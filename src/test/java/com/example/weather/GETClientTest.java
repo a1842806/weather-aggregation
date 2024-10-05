@@ -61,8 +61,6 @@ public class GETClientTest {
     /**
      * Tests if GETClient can successfully retrieve data that was previously sent via a PUT request.
      * Sends a PUT request to store weather data, then runs GETClient to retrieve and verify the data.
-     *
-     * @throws IOException If there is an error in sending the PUT request.
      */
     @Test
     @Order(1)
@@ -106,8 +104,6 @@ public class GETClientTest {
     /**
      * Tests if GETClient correctly handles a "No Content" scenario.
      * Runs GETClient for a non-existent station and verifies that the logger captures the appropriate message.
-     *
-     * @throws IOException If an error occurs during file operations.
      */
     @Test
     @Order(2)
@@ -187,7 +183,6 @@ public class GETClientTest {
      *
      * @param data A map containing the weather data to be sent.
      * @return HttpURLConnection object for further assertions.
-     * @throws IOException If an I/O error occurs during the PUT request.
      */
     private HttpURLConnection sendPutRequest(Map<String, String> data) throws IOException {
         HttpURLConnection connection = (HttpURLConnection) URI.create(SERVER_URL + "/weather.json").toURL().openConnection();
@@ -208,8 +203,6 @@ public class GETClientTest {
 
     /**
      * Helper method to delete the data file ("weather_data.json") to simulate a "No Content" scenario.
-     *
-     * @throws IOException If an I/O error occurs during file operations.
      */
     private void deleteDataFile() throws IOException {
         File dataFile = new File("weather_data.json");
