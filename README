@@ -1,0 +1,8 @@
+
+mvn exec:java -Dexec.mainClass="com.example.weather.AggregationServer" -Dexec.args="4567"
+
+mvn exec:java -Dexec.mainClass="com.example.weather.ContentServer" -Dexec.args="http://localhost:4567/weather.json content/weather1.txt"
+
+mvn exec:java -Dexec.mainClass="com.example.weather.GETClient" -Dexec.args="http://localhost:4567/weather.json IDS60901"
+
+mvn -Dtest=JSONParserTest test
