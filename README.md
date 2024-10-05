@@ -37,13 +37,13 @@ mvn -version
 <br>
 
 ## Setup and Installation
-1. Clone the Repository (optional, if using version control):
+### 1. Clone the Repository (optional, if using version control):
 ```bash
 git clone https://github.com/a1842806/weather-aggregation.git
 cd weather-aggregation-server
 ```
 
-2. Compile the Application Using Maven:
+### 2. Compile the Application Using Maven:
 In the root directory of the project, run:
 ```bash
 mvn clean compile
@@ -51,7 +51,7 @@ mvn clean compile
 <br>
 
 ## Running the Application
-1. Start the AggregationServer
+### 1. Start the AggregationServer
 To start the main server, run the following command from the project directory:
 
 ```bash
@@ -64,7 +64,7 @@ The server will start on the default port 4567. You can specify a different port
 java -cp target/classes com.example.weather.AggregationServer \<port-number\>
 ```
 
-2. Start the ContentServer(s)
+### 2. Start the ContentServer(s)
 ContentServer reads data from a file and sends it to the AggregationServer. To start a ContentServer, use:
 
 ```bash
@@ -78,7 +78,7 @@ java -cp target/classes com.example.weather.ContentServer http://localhost:4567 
 
 You can run multiple ContentServer instances concurrently with different data files.
 
-3. Start the GETClient
+### 3. Start the GETClient
 GETClient retrieves weather data from the AggregationServer. To run GETClient, use:
 
 ```bash
