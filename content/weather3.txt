@@ -1,0 +1,17 @@
+id:ANOTHERSTATION_2
+name:Melbourne (Southbank)
+state: VIC
+time_zone:AEST
+lat:-66
+lon:205
+local_date_time:17/02:00am
+local_date_time_full:20230715200000
+air_temp:7
+apparent_t:88
+cloud:Clear
+dewpt:4
+press:1020
+rel_hum:62
+wind_dir:SW
+wind_spd_kmh:2
+wind_spd_kt:4
