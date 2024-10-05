@@ -134,6 +134,7 @@ java -cp target/classes com.example.weather.GETClient http://localhost:4567 stat
 
 ### Step 5: Test Data Expiration
 Terminate the ContentServer instances, wait for 30 seconds and re-run the GETClient commands. You should see “No content available” after data expires.
+
 <br>
 
 ## Design Choices and Decisions
