@@ -19,6 +19,8 @@ The core components include:
 - **GETClient**: Retrieves weather data from the AggregationServer.
 
 ### Project Structure Overview
+
+```text
 weather-aggregation/
 ├── pom.xml
 ├── README.md
@@ -45,6 +47,7 @@ weather-aggregation/
 └── content
     ├── original_data.txt
     └── another_station.txt
+```
 
 - pom.xml: Maven build file containing project dependencies and build configurations.
 - src/main/java: Contains the source code for the application.
