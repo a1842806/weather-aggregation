@@ -17,6 +17,40 @@ The core components include:
 - **AggregationServer**: Collects and serves weather data.
 - **ContentServer**: Sends weather data updates to the AggregationServer.
 - **GETClient**: Retrieves weather data from the AggregationServer.
+
+### Project Structure Overview
+weather-aggregation/
+├── pom.xml
+├── README.md
+├── src
+│   ├── main
+│   │   └── java
+│   │       └── com
+│   │           └── example
+│   │               └── weather
+│   │                   ├── AggregationServer.java
+│   │                   ├── ContentServer.java
+│   │                   ├── GETClient.java
+│   │                   └── JSONParser.java
+│   └── test
+│       └── java
+│           └── com
+│               └── example
+│                   └── weather
+│                       ├── AggregationServerTest.java
+│                       ├── ContentServerTest.java
+│                       ├── GETClientTest.java
+│                       └── JSONParserTest.java
+│                       └── IntegrationTest.java
+└── content
+    ├── original_data.txt
+    └── another_station.txt
+
+- pom.xml: Maven build file containing project dependencies and build configurations.
+- src/main/java: Contains the source code for the application.
+- src/test/java: Contains the unit and integration tests.
+- content/: Directory containing sample weather data files for ContentServer.
+
 <br>
 
 ## Prerequisites
@@ -40,17 +74,10 @@ mvn -version
 ### 1. Clone the Repository (optional, if using version control):
 ```bash
 git clone https://github.com/a1842806/weather-aggregation.git
-cd weather-aggregation-server
+cd weather-aggregation
 ```
 
-### 2. Install Dependencies:
-To download and install all necessary dependencies specified in the pom.xml file, run:
-```bash
-mvn dependency:resolve
-```
-This command will resolve and download the required dependencies (e.g., JUnit for testing).
-
-### 3. Compile the Application Using Maven:
+### 2. Compile the Application Using Maven:
 In the root directory of the project, run:
 ```bash
 mvn clean compile
@@ -100,7 +127,9 @@ java -cp target/classes com.example.weather.GETClient http://localhost:4567 stat
 <br>
 
 ## Running Automated Tests
-The project includes comprehensive unit and integration tests using JUnit. To run all the tests, use the following Maven command:
+The project includes comprehensive unit and integration tests using JUnit. Make sure you terminate all instances running on default port, and delete the **weather_data.json** file before running the tests.
+
+To run all the tests, use the following Maven command:
 ```bash
 mvn test
 ```
@@ -136,8 +165,8 @@ java -cp target/classes com.example.weather.ContentServer http://localhost:4567 
 ### Step 4: Start GETClient Instances
 Run GETClient instances to verify data retrieval:
 ```bash
-java -cp target/classes com.example.weather.GETClient http://localhost:4567 stationTest1
-java -cp target/classes com.example.weather.GETClient http://localhost:4567 stationTest2
+java -cp target/classes com.example.weather.GETClient http://localhost:4567 station1
+java -cp target/classes com.example.weather.GETClient http://localhost:4567 station2
 ```
 
 ### Step 5: Test Data Expiration
@@ -157,11 +186,6 @@ The **Content Server** is designed to **send PUT requests every `x` seconds** to
   - To handle transient network issues, each PUT request is configured to **retry `y` times** (e.g., 3 retries) if it encounters a failure. 
   - After `y` unsuccessful retries, the Content Server will log the failure and continue its periodic updates without retrying further until the next scheduled interval.
 
-### 2. Synchronization Strategy
-**Lamport Clocks** were chosen to ensure consistency across multiple ContentServers. This ensures events order without needing a central clock.
-
-### 3. Expiration Mechanism for Weather Data
-We implemented an **expiration mechanism** using timestamps to ensure that only the most recent 20 weather entries are kept. This was chosen over a fixed-size queue to allow for flexible data management.
-
-### 4. Custom JSON Parsing 
+### 2. Custom JSON Parsing 
 Although libraries like Jackson could simplify JSON parsing, a custom JSON parser was implemented for finer control and to earn bonus points as per assignment requirements.
+
