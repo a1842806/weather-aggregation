@@ -22,7 +22,7 @@ The core components include:
 ## Prerequisites
 Before running the application, ensure you have the following prerequisites installed:
 
-- **Java Development Kit (JDK)**: Version 11 or higher.
+- **Java Development Kit (JDK)**: Version 11 or higher. (I'm using 22.0.2)
 - **Apache Maven**: Used for building and managing dependencies.
 - **Git** (optional): To clone the repository.
 
