@@ -125,7 +125,7 @@ java -cp target/classes com.example.weather.GETClient \<server-url\> \<station-i
 
 Example:
 ```bash
-java -cp target/classes com.example.weather.GETClient http://localhost:4567 station1
+java -cp target/classes com.example.weather.GETClient http://localhost:4567 IDS60901
 ```
 <br>
 
