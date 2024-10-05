@@ -43,12 +43,20 @@ git clone https://github.com/a1842806/weather-aggregation.git
 cd weather-aggregation-server
 ```
 
-### 2. Compile the Application Using Maven:
+### 2. Install Dependencies:
+To download and install all necessary dependencies specified in the pom.xml file, run:
+```bash
+mvn dependency:resolve
+```
+This command will resolve and download the required dependencies (e.g., JUnit for testing).
+
+### 3. Compile the Application Using Maven:
 In the root directory of the project, run:
 ```bash
 mvn clean compile
 ```
 <br>
+
 
 ## Running the Application
 ### 1. Start the AggregationServer
